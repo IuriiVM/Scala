@@ -19,6 +19,14 @@ object Main {
          val result = new Array[Array[Int]](r+1)
          for (row <- 0 to r) {
            result(row) = new Array[Int](r+1)
+           for (col <- 0 to row) {
+             if (col == 0 || col == row) {
+               result(row)(col) = 1
+             }
+             else {
+               result(row)(col) = result(row-1)(col-1) + result(row-1)(col)
+             }
+           }
          }
         result
       }
@@ -32,6 +40,7 @@ object Main {
        }
       val state = initState(r)
       pascalInner(c, r, state)
+      state(r)(c)
     }
   
   /**
