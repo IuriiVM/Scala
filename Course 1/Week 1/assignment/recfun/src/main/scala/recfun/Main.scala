@@ -46,7 +46,34 @@ object Main {
   /**
    * Exercise 2
    */
-    def balance(chars: List[Char]): Boolean = ???
+    def balance(chars: List[Char]): Boolean = {
+      def balanceInner(chars: List[Char], counter: Int): Boolean = {
+        var result = false
+        if (chars.isEmpty) {
+          result = (counter == 0)
+        }
+        else {
+          if (chars.head == '(') {
+            result = balanceInner(chars.tail, counter + 1)
+          }
+          else {
+            if (chars.head == ')') {
+              if (counter == 0) {
+                result = false
+              }
+              else {
+                result = balanceInner(chars.tail, counter - 1)
+              }
+            }
+            else {
+              result = balanceInner(chars.tail, counter)
+            }
+          }
+        }
+        result
+      }
+      balanceInner(chars,0)
+    }
   
   /**
    * Exercise 3
