@@ -20,11 +20,12 @@ object WikipediaRanking {
     "JavaScript", "Java", "PHP", "Python", "C#", "C++", "Ruby", "CSS",
     "Objective-C", "Perl", "Scala", "Haskell", "MATLAB", "Clojure", "Groovy")
 
-  val conf: SparkConf = new SparkConf()
+  val conf: SparkConf = new SparkConf().setAppName("Wikipedia").setMaster("local[2]")
   val sc: SparkContext = new SparkContext(conf)
+  //val wikiRddStr: RDD[String] = sc.textFile(WikipediaData.filePath)
+  val wikiRddStr: RDD[String] = sc.textFile("d:\\test.txt")
   // Hint: use a combination of `sc.textFile`, `WikipediaData.filePath` and `WikipediaData.parse`
-  val wikiRddStr: RDD[String] = sc.textFile(WikipediaData.filePath)
-  val wikiRdd: RDD[WikipediaArticle] = ???
+  //val wikiRdd: RDD[WikipediaArticle] = ???
 
   def testMethod(): Long = {
     return wikiRddStr.count()
@@ -70,6 +71,7 @@ object WikipediaRanking {
 
   def main(args: Array[String]) {
 
+    /*
     /* Languages ranked according to (1) */
     val langsRanked: List[(String, Int)] = timed("Part 1: naive ranking", rankLangs(langs, wikiRdd))
 
@@ -83,10 +85,11 @@ object WikipediaRanking {
     val langsRanked3: List[(String, Int)] = timed("Part 3: ranking using reduceByKey", rankLangsReduceByKey(langs, wikiRdd))
 
     /* Output the speed of each ranking */
-    println(timing)
+    println(timing)*/
     sc.stop()
   }
 
+  /*
   val timing = new StringBuffer
   def timed[T](label: String, code: => T): T = {
     val start = System.currentTimeMillis()
@@ -94,5 +97,5 @@ object WikipediaRanking {
     val stop = System.currentTimeMillis()
     timing.append(s"Processing $label took ${stop - start} ms.\n")
     result
-  }
+  }*/
 }
