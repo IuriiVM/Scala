@@ -38,8 +38,19 @@ object WikipediaRanking {
    *  Hint1: consider using method `aggregate` on RDD[T].
    *  Hint2: consider using method `mentionsLanguage` on `WikipediaArticle`
    */
+
+  def langCounter(lang: String, article: WikipediaArticle) : Int = {
+    var result: Int = 0
+    if (article.mentionsLanguage(lang))
+      {
+        result = 1
+      }
+    return result
+  }
+
+  // Start from unit testing it
   def occurrencesOfLang(lang: String, rdd: RDD[WikipediaArticle]): Int = {
-    rdd.aggregate(0)((acc, value) => (acc + value.mentionsLanguage(lang)), _+_/*(_.mentionsLanguage(lang) ? 1 : 0)*/)
+    rdd.aggregate(0)((acc, value) => (acc + langCounter(lang, value)), _+_)
     return 0
   }
 
