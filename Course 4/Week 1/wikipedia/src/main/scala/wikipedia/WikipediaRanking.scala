@@ -3,7 +3,6 @@ package wikipedia
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
-
 import org.apache.spark.rdd.RDD
 
 case class WikipediaArticle(title: String, text: String) {
@@ -30,29 +29,22 @@ object WikipediaRanking {
     wikiRddStr.map(s => WikipediaData.parse(s))
   }
 
-  def testMethod(): Long = {
-    return wikiRddStr.count()
-  }
-
   /** Returns the number of articles on which the language `lang` occurs.
    *  Hint1: consider using method `aggregate` on RDD[T].
    *  Hint2: consider using method `mentionsLanguage` on `WikipediaArticle`
    */
 
-  def langCounter(lang: String, article: WikipediaArticle) : Int = {
-    var result: Int = 0
-    if (article.mentionsLanguage(lang))
-      {
-        result = 1
-      }
-    return result
-  }
+  def langCounter(lang: String, article: WikipediaArticle) : Int = if (article.mentionsLanguage(lang)) 1 else 0
 
   // Start from unit testing it
   def occurrencesOfLang(lang: String, rdd: RDD[WikipediaArticle]): Int = {
-    rdd.aggregate(0)((acc, value) => (acc + langCounter(lang, value)), _+_)
-    return 0
+    return rdd.aggregate(0)((acc, value) => acc + langCounter(lang, value), _+_)
   }
+
+  /*def addElem(listBuffer: ListBuffer[(String, Int)], lang: String, occur: Int): Unit =
+  {
+    listBuffer += (lang, occur)
+  }*/
 
   /* (1) Use `occurrencesOfLang` to compute the ranking of the languages
    *     (`val langs`) by determining the number of Wikipedia articles that
@@ -62,7 +54,10 @@ object WikipediaRanking {
    *   Note: this operation is long-running. It can potentially run for
    *   several seconds.
    */
-  def rankLangs(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = ???
+  def rankLangs(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = {
+    val ranks = langs.map(lang => (lang, occurrencesOfLang(lang, rdd)))
+    return ranks.sortWith(_._2 > _._2)
+  }
 
   /* Compute an inverted index of the set of articles, mapping each language
    * to the Wikipedia pages in which it occurs.
