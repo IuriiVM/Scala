@@ -102,7 +102,6 @@ class WikipediaSuite extends FunSuite with BeforeAndAfterAll {
     assert(res)
   }
 
-/*
   test("'makeIndex' creates a simple index with two entries") {
     assert(initializeWikipediaRanking(), " -- did you fill in all the values in WikipediaRanking (conf, sc, wikiRdd)?")
     import WikipediaRanking._
@@ -150,6 +149,6 @@ class WikipediaSuite extends FunSuite with BeforeAndAfterAll {
     val res = (ranked.head._1 == "Java")
     assert(res)
   }
-*/
+
 
 }
