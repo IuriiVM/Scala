@@ -14,6 +14,7 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
 
 
   lazy val testObject = new StackOverflow {
+  //val testObject = new StackOverflow {
     override val langs =
       List(
         "JavaScript", "Java", "PHP", "Python", "C#", "C++", "Ruby", "CSS",
@@ -34,5 +35,9 @@ class StackOverflowSuite extends FunSuite with BeforeAndAfterAll {
     assert(instantiatable, "Can't instantiate a StackOverflow object")
   }
 
-
+  test("call main on test object") {
+    val testObject = StackOverflow
+    val args: Array[String] = new Array[String](0)
+    testObject.main(args)
+  }
 }

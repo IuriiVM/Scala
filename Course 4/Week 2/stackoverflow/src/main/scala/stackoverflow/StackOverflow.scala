@@ -23,13 +23,15 @@ object StackOverflow extends StackOverflow {
     val lines   = sc.textFile("src/main/resources/stackoverflow/stackoverflow.csv")
     val raw     = rawPostings(lines)
     val grouped = groupedPostings(raw)
+    assert(grouped.count() == 2121822, "Incorrect number of grouped: " + grouped.count())
     val scored  = scoredPostings(grouped)
-    val vectors = vectorPostings(scored)
+    assert(scored.count() == 2121822, "Incorrect number of scored: " + scored.count())
+    /*val vectors = vectorPostings(scored)
 //    assert(vectors.count() == 2121822, "Incorrect number of vectors: " + vectors.count())
 
     val means   = kmeans(sampleVectors(vectors), vectors, debug = true)
     val results = clusterResults(means, vectors)
-    printResults(results)
+    printResults(results)*/
   }
 }
 
@@ -78,7 +80,9 @@ class StackOverflow extends Serializable {
 
   /** Group the questions and answers together */
   def groupedPostings(postings: RDD[Posting]): RDD[(QID, Iterable[(Question, Answer)])] = {
-    ???
+    var questions = postings.filter(posting => posting.postingType == 1).map(posting => (posting.id, posting))
+    var answers = postings.filter(posting => posting.postingType != 1).map(posting => (posting.parentId.get, posting))
+    return questions.join(answers).groupByKey
   }
 
 
@@ -97,7 +101,7 @@ class StackOverflow extends Serializable {
       highScore
     }
 
-    ???
+    return grouped.flatMap(r => r._2).groupByKey().mapValues(v => answerHighScore(v.toArray))
   }
 
 
