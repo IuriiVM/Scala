@@ -47,11 +47,13 @@ Actions:
 * foreach(f) apples function f to all elements of RDD
 * reduce(op: (A, A) => A) combines elements in RDD together using op function and return result
 * count() - number of elements in RDD
+
 Transformations which combine RDDs:
 * union(other: RDD[T])
 * intersection (other: RDD[T]) - returns RDD containing elements present in both source RDDs
 * subtract (other: RDD[T]) - first RDD minus second RDD
 * cartesian[U](other: RDD[U]): RDD[(T, U)] - Cartesian product with the other RDD  
+
 Spark actions absent in Scala:
 * takeSample - returns array of N random elements from RDD
 * takeOrdered - first N elements in natural order or using comparator
