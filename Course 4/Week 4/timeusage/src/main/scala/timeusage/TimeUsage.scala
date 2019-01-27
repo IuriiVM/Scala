@@ -5,6 +5,8 @@ import java.nio.file.Paths
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
 
+import scala.collection.mutable.ListBuffer
+
 /** Main class */
 object TimeUsage {
 
@@ -29,9 +31,12 @@ object TimeUsage {
   def timeUsageByLifePeriod(): Unit = {
     val (columns, initDf) = read("/timeusage/atussum.csv")
     val (primaryNeedsColumns, workColumns, otherColumns) = classifiedColumns(columns)
-    val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
+    println(primaryNeedsColumns)
+    println(workColumns)
+    println(otherColumns)
+    /*val summaryDf = timeUsageSummary(primaryNeedsColumns, workColumns, otherColumns, initDf)
     val finalDf = timeUsageGrouped(summaryDf)
-    finalDf.show()
+    finalDf.show()*/
   }
 
   /** @return The read DataFrame along with its column names. */
@@ -62,15 +67,32 @@ object TimeUsage {
     *         have type Double. None of the fields are nullable.
     * @param columnNames Column names of the DataFrame
     */
-  def dfSchema(columnNames: List[String]): StructType =
-    ???
+  def dfSchema(columnNames: List[String]): StructType = {
+    var ret = new StructType()
+    val nullable = false
+    // Must reassign ret as add returns a new StructType!
+    ret = ret.add(columnNames.head, StringType, nullable)
+    for (col <- columnNames.tail) {
+      ret = ret.add(col, DoubleType, nullable)
+    }
+    ret
+  }
 
 
   /** @return An RDD Row compatible with the schema produced by `dfSchema`
     * @param line Raw fields
     */
-  def row(line: List[String]): Row =
-    ???
+  def row(line: List[String]): Row = {
+    val head = Seq(line.head)
+    val tail = line.tail.map {
+      v =>
+      {
+        /*if (v == null) 0D
+        else*/ v.toDouble
+      }
+    }
+    Row.fromSeq(head ++ tail)
+  }
 
   /** @return The initial data frame columns partitioned in three groups: primary needs (sleeping, eating, etc.),
     *         work and other (leisure activities)
@@ -88,7 +110,49 @@ object TimeUsage {
     *    “t10”, “t12”, “t13”, “t14”, “t15”, “t16” and “t18” (those which are not part of the previous groups only).
     */
   def classifiedColumns(columnNames: List[String]): (List[Column], List[Column], List[Column]) = {
-    ???
+    var primary = ListBuffer[Column]()
+    var work = ListBuffer[Column]()
+    var other = ListBuffer[Column]()
+    def isPrimaryNeedActivity(columnName: String): Boolean = {
+      val prefixes = List("t01", "t03", "t11", "t1801", "t1803")
+      for (prefix <- prefixes) {
+        if (columnName.startsWith(prefix)) {
+          return true
+        }
+      }
+      false
+    }
+    def isWorkActivity(columnName: String): Boolean = {
+      val prefixes = List("t05", "t1805")
+      for (prefix <- prefixes) {
+        if (columnName.startsWith(prefix)) {
+          return true
+        }
+      }
+      false
+    }
+    def isOtherActivity(columnName: String): Boolean = {
+      val prefixes = List("t02", "t04", "t06", "t07", "t08", "t09", "t10", "t12", "t13", "t14", "t15", "t16", "t18")
+      for (prefix <- prefixes) {
+        if (columnName.startsWith(prefix)) {
+          return true
+        }
+      }
+      false
+    }
+    for (name <- columnNames) {
+      if (isPrimaryNeedActivity(name)) {
+        primary += col(name)
+      } else if (isWorkActivity(name)) {
+        work += col(name)
+      } else if (isOtherActivity(name)) {
+        other += col(name)
+      }
+    }
+    assert(!primary.isEmpty)
+    assert(!work.isEmpty)
+    assert(!other.isEmpty)
+    (primary.toList, work.toList, other.toList)
   }
 
   /** @return a projection of the initial DataFrame such that all columns containing hours spent on primary needs
