@@ -44,6 +44,7 @@ object TimeUsage {
     val finalDs = timeUsageGroupedTyped(summaryDs)
     println("finalDs")
     finalDs.show()
+    println("Program completion")
   }
 
   /** @return The read DataFrame along with its column names. */
